@@ -41,12 +41,14 @@ INSTANTIATE_TEST_CASE_P(IpVersions, TapIntegrationTest,
 
 // Verify a basic tap flow using the admin handler.
 TEST_P(TapIntegrationTest, AdminBasicFlow) {
+  // fixfix docs
   const std::string FILTER_CONFIG =
       R"EOF(
 name: envoy.filters.http.tap
 config:
-  admin_config:
-    config_id: test_config_id
+  common_config:
+    admin_config:
+      config_id: test_config_id
 )EOF";
 
   initializeFilter(FILTER_CONFIG);

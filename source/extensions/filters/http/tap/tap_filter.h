@@ -2,12 +2,10 @@
 
 #include "envoy/config/filter/http/tap/v2alpha/tap.pb.h"
 #include "envoy/http/filter.h"
-#include "envoy/service/tap/v2alpha/common.pb.h"
 #include "envoy/stats/scope.h"
 #include "envoy/stats/stats_macros.h"
-#include "envoy/thread_local/thread_local.h"
 
-#include "extensions/common/tap/admin.h"
+#include "extensions/common/tap/extension_config_base.h"
 #include "extensions/filters/http/tap/tap_config.h"
 
 namespace Envoy {
@@ -53,36 +51,20 @@ using FilterConfigSharedPtr = std::shared_ptr<FilterConfig>;
 /**
  * Configuration for the tap filter.
  */
-class FilterConfigImpl : public FilterConfig,
-                         public Extensions::Common::Tap::ExtensionConfig,
-                         Logger::Loggable<Logger::Id::tap> {
+class FilterConfigImpl : public FilterConfig, public Extensions::Common::Tap::ExtensionConfigBase {
 public:
-  FilterConfigImpl(envoy::config::filter::http::tap::v2alpha::Tap proto_config,
-                   const std::string& stats_prefix, HttpTapConfigFactoryPtr&& config_factory,
+  FilterConfigImpl(const envoy::config::filter::http::tap::v2alpha::Tap& proto_config,
+                   const std::string& stats_prefix,
+                   Extensions::Common::Tap::TapConfigFactoryPtr&& config_factory,
                    Stats::Scope& scope, Server::Admin& admin, Singleton::Manager& singleton_manager,
                    ThreadLocal::SlotAllocator& tls, Event::Dispatcher& main_thread_dispatcher);
-  ~FilterConfigImpl() override;
 
   // FilterConfig
   HttpTapConfigSharedPtr currentConfig() override;
   FilterStats& stats() override { return stats_; }
 
-  // Extensions::Common::Tap::ExtensionConfig
-  void clearTapConfig() override;
-  const std::string& adminId() override;
-  void newTapConfig(envoy::service::tap::v2alpha::TapConfig&& proto_config,
-                    Extensions::Common::Tap::Sink* admin_streamer) override;
-
 private:
-  struct TlsFilterConfig : public ThreadLocal::ThreadLocalObject {
-    HttpTapConfigSharedPtr config_;
-  };
-
-  const envoy::config::filter::http::tap::v2alpha::Tap proto_config_;
   FilterStats stats_;
-  HttpTapConfigFactoryPtr config_factory_;
-  ThreadLocal::SlotPtr tls_slot_;
-  Extensions::Common::Tap::AdminHandlerSharedPtr admin_handler_;
 };
 
 /**

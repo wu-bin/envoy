@@ -56,6 +56,34 @@ public:
                             Sink* admin_streamer) PURE;
 };
 
+/**
+ * fixfix
+ */
+class TapConfig {
+public:
+  virtual ~TapConfig() = default;
+};
+
+using TapConfigSharedPtr = std::shared_ptr<TapConfig>;
+
+/**
+ * fixfix
+ */
+class TapConfigFactory {
+public:
+  virtual ~TapConfigFactory() = default;
+
+  /**
+   * @return a new configuration given a raw tap service config proto. See
+   * ExtensionConfig::newTapConfig() for param info.
+   */
+  virtual TapConfigSharedPtr
+  createConfigFromProto(envoy::service::tap::v2alpha::TapConfig&& proto_config,
+                        Sink* admin_streamer) PURE;
+};
+
+using TapConfigFactoryPtr = std::unique_ptr<TapConfigFactory>;
+
 } // namespace Tap
 } // namespace Common
 } // namespace Extensions
